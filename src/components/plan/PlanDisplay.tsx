@@ -84,7 +84,7 @@ function DayCard({ schedule }: { schedule: DaySchedule }) {
 
           <tbody>
             {schedule.exercises.map((exercise, key) => (
-              <ExerciseRow exercise={exercise} index={key} />
+              <ExerciseRow key={key} exercise={exercise} index={key} />
             ))}
           </tbody>
         </table>

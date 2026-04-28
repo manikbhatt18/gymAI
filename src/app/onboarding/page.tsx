@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
-import { useAuth } from '../context/AuthContext';
-import { RedirectToSignIn, SignedIn } from '@neondatabase/neon-js/auth/react';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { ArrowRight, Loader2 } from 'lucide-react';
-import { Textarea } from '../components/ui/Textarea';
-import { Select } from '../components/ui/Select';
-import type { UserProfile } from '../types';
-import { useNavigate } from "react-router-dom";
+"use client";
 
+import React, { useState } from 'react'
+import { useAuth } from '../../context/AuthContext';
+import { RedirectToSignIn, SignedIn } from '@neondatabase/neon-js/auth/react';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import { Textarea } from '../../components/ui/Textarea';
+import { Select } from '../../components/ui/Select';
+import type { UserProfile } from '../../types';
+import { useRouter } from "next/navigation";
 
 
 const goalOptions = [
@@ -59,7 +60,7 @@ const Onboarding = () => {
   const { user, saveProfile, generatePlan } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const router = useRouter();
   const [formData, setFormData] = useState({
     goal: "bulk",
     experience: "intermediate",
@@ -75,7 +76,7 @@ const Onboarding = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function handleQuestionnaire(e: React.SubmitEvent) {
+  async function handleQuestionnaire(e: React.FormEvent) {
     e.preventDefault();
 
     const profile: Omit<UserProfile, "userId" | "updatedAt"> = {
@@ -91,6 +92,7 @@ const Onboarding = () => {
       await saveProfile(profile);
       setIsGenerating(true);
       await generatePlan();
+      router.push("/profile");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save profile");
     } finally {

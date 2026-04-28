@@ -1,4 +1,8 @@
-import { Link, Navigate } from "react-router-dom";
+"use client";
+
+import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Zap,
   Target,
@@ -40,11 +44,18 @@ const features = [
 
 export default function Home() {
   const { user, isLoading } = useAuth();
+  const router = useRouter();
 
-  // Redirect authenticated users to profile
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/profile");
+    }
+  }, [user, isLoading, router]);
+
   if (!isLoading && user) {
-    return <Navigate to="/profile" replace />;
+    return null; // Avoid flashing the home page while redirecting
   }
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -74,13 +85,13 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/onboarding">
+            <Link href="/onboarding">
               <Button size="lg" className="gap-2">
                 Get Started Free
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
-            <Link to="/onboarding">
+            <Link href="/onboarding">
               <Button variant="secondary" size="lg">
                 Sign In
               </Button>

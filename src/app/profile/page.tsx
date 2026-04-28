@@ -1,6 +1,9 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { Button } from "../components/ui/Button";
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
+import { Button } from "../../components/ui/Button";
 import {
   Calendar,
   Dumbbell,
@@ -8,18 +11,25 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-import { Card } from "../components/ui/Card";
-import { PlanDisplay } from "../components/plan/PlanDisplay";
+import { Card } from "../../components/ui/Card";
+import { PlanDisplay } from "../../components/plan/PlanDisplay";
 
 export default function Profile() {
   const { user, isLoading, plan, generatePlan } = useAuth();
+  const router = useRouter();
 
-  if (!user && !isLoading) {
-    return <Navigate to="/auth/sign-in" replace />;
-  }
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        router.replace("/auth/sign-in");
+      } else if (!plan) {
+        router.replace("/onboarding");
+      }
+    }
+  }, [user, isLoading, plan, router]);
 
-  if (!plan) {
-    return <Navigate to="/onboarding" replace />;
+  if (isLoading || !user || !plan) {
+    return null; // Don't flash profile content while redirecting or loading
   }
 
   function formatDate(dateString: string) {

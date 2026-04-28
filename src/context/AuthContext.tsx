@@ -1,3 +1,4 @@
+"use client";
 
 import { createContext, useContext, useEffect, useState, useRef, type ReactNode, useCallback } from "react";
 import type { User, UserProfile, TrainingPlan } from "../types";
