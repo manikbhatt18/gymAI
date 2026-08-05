@@ -7,7 +7,7 @@ import type {
   TrainingPlan,
 } from "../types";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/+$/, "");
 
 async function post<T = unknown>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${BASE_URL}/api${path}`, {
