@@ -106,20 +106,20 @@ const Onboarding = () => {
   }
   return (
     <SignedIn>
-      <div className="min-h-screen pt-24 pb-12 px-6">
+      <div className="min-h-screen pt-20 sm:pt-24 pb-12 px-4 sm:px-6">
         <div className="max-w-xl mx-auto">
           {/* Progress Indicator */}
 
           {/* Step 1: Questionnaire */}
           {!isGenerating ? (
-            <Card variant="bordered">
-              <h1 className="text-2xl font-bold mb-2">
+            <Card variant="bordered" className="p-4 sm:p-6">
+              <h1 className="text-xl sm:text-2xl font-bold mb-2">
                 Tell Us About Yourself
               </h1>
-              <p className="text-[var(--color-muted)] mb-6">
+              <p className="text-xs sm:text-sm text-[var(--color-muted)] mb-6">
                 Help us create the perfect plan for you.
               </p>
-              <form onSubmit={handleQuestionnaire} className="space-y-5">
+              <form onSubmit={handleQuestionnaire} className="space-y-4 sm:space-y-5">
                 <Select
                   id="goal"
                   label="What's your primary goal?"
@@ -134,7 +134,7 @@ const Onboarding = () => {
                   value={formData.experience}
                   onChange={(e) => updateForm("experience", e.target.value)}
                 />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Select
                     id="daysPerWeek"
                     label="Days per week"

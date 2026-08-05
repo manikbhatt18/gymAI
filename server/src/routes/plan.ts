@@ -1,12 +1,14 @@
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../lib/prisma";
 import { generateTrainingPlan } from "../lib/ai";
+import type { InputJsonValue } from "../generated/prisma/internal/prismaNamespace";
+import type { GeneratedPlanJson } from "../../types/index";
 
 export const planRouter = Router();
 
 planRouter.post("/generate", async (req: Request, res: Response) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.body as { userId?: string };
 
     if (!userId) {
       return res.status(400).json({ error: "User ID is required" });
@@ -22,15 +24,18 @@ planRouter.post("/generate", async (req: Request, res: Response) => {
         .json({ error: "User profile not found. Complete onboarding first." });
     }
 
-    // NEED THE PLAN TABLE
+    // Retrieve the latest plan to compute next version
     const latestPlan = await prisma.training_plans.findFirst({
       where: { user_id: userId },
-      orderBy: { created_at: "desc" },
+      orderBy: [
+        { version: "desc" },
+        { created_at: "desc" },
+      ],
       select: { version: true },
     });
 
     const nextVersion = latestPlan ? latestPlan.version + 1 : 1;
-    let planJson;
+    let planJson: GeneratedPlanJson;
 
     try {
       planJson = await generateTrainingPlan(profile);
@@ -47,7 +52,7 @@ planRouter.post("/generate", async (req: Request, res: Response) => {
     const newPlan = await prisma.training_plans.create({
       data: {
         user_id: userId,
-        plan_json: planJson as any,
+        plan_json: planJson as unknown as InputJsonValue,
         plan_text: planText,
         version: nextVersion,
       },
@@ -73,7 +78,10 @@ planRouter.get("/current", async (req: Request, res: Response) => {
 
     const plan = await prisma.training_plans.findFirst({
       where: { user_id: userId },
-      orderBy: { created_at: "desc" },
+      orderBy: [
+        { version: "desc" },
+        { created_at: "desc" },
+      ],
     });
 
     if (!plan) {

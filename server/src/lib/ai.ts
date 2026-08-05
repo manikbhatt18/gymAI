@@ -1,12 +1,19 @@
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import { TrainingPlan, UserProfile } from "../../types/index";
+import type {
+  UserProfile,
+  UserProfileInput,
+  GeneratedPlanJson,
+  RawAiTrainingPlanResponse,
+  RawAiDaySchedule,
+  RawAiExercise,
+} from "../../types/index";
 
 dotenv.config();
 
 export async function generateTrainingPlan(
-  profile: UserProfile | Record<string, any>,
-): Promise<Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt">> {
+  profile: UserProfileInput,
+): Promise<GeneratedPlanJson> {
   // Normalize profile data
   const normalizedProfile: UserProfile = {
     goal: profile.goal || "bulk",
@@ -54,7 +61,7 @@ export async function generateTrainingPlan(
       response_format: { type: "json_object" },
     });
 
-    const content = completion.choices[0].message.content;
+    const content = completion.choices[0]?.message?.content;
 
     if (!content) {
       console.error(
@@ -64,7 +71,7 @@ export async function generateTrainingPlan(
       throw new Error("No content in AI response");
     }
 
-    const planData = JSON.parse(content);
+    const planData: RawAiTrainingPlanResponse = JSON.parse(content);
 
     return formatPlanResponse(planData, normalizedProfile);
   } catch (error) {
@@ -74,10 +81,10 @@ export async function generateTrainingPlan(
 }
 
 function formatPlanResponse(
-  aiResponse: any,
+  aiResponse: RawAiTrainingPlanResponse,
   profile: UserProfile,
-): Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt"> {
-  const plan: Omit<TrainingPlan, "id" | "userId" | "version" | "createdAt"> = {
+): GeneratedPlanJson {
+  const plan: GeneratedPlanJson = {
     overview: {
       goal: aiResponse.overview?.goal || `Customized ${profile.goal} program`,
       frequency:
@@ -88,15 +95,15 @@ function formatPlanResponse(
         aiResponse.overview?.notes ||
         "Follow the program consistently for best results.",
     },
-    weeklySchedule: (aiResponse.weeklySchedule || []).map((day: any) => ({
+    weeklySchedule: (aiResponse.weeklySchedule || []).map((day: RawAiDaySchedule) => ({
       day: day.day || "Day",
       focus: day.focus || "Full Body",
-      exercises: (day.exercises || []).map((ex: any) => ({
+      exercises: (day.exercises || []).map((ex: RawAiExercise) => ({
         name: ex.name || "Exercise",
-        sets: ex.sets || 3,
+        sets: typeof ex.sets === "number" ? ex.sets : 3,
         reps: ex.reps || "8-12",
         rest: ex.rest || "60-90 sec",
-        rpe: ex.rpe || 7,
+        rpe: typeof ex.rpe === "number" ? ex.rpe : 7,
         notes: ex.notes,
         alternatives: ex.alternatives,
       })),

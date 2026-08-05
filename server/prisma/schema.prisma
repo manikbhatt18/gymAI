@@ -34,3 +34,27 @@ model user_profiles {
   preferred_split String @db.VarChar(20)
   updated_at DateTime @default(now()) @db.Timestamptz(6)
 }
+
+model workout_logs {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id String @db.Uuid
+  plan_id String @db.Uuid
+  day_name String @db.VarChar(50)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  set_logs set_logs[]
+  
+  @@index([user_id], map: "idx_workout_logs_user_id")
+}
+
+model set_logs {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workout_log_id String @db.Uuid
+  exercise_name String @db.VarChar(100)
+  set_number Int
+  weight Float
+  reps Int
+  rpe Int?
+  
+  workout_log workout_logs @relation(fields: [workout_log_id], references: [id], onDelete: Cascade)
+}

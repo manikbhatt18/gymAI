@@ -10,6 +10,7 @@ import {
   RefreshCcw,
   Target,
   TrendingUp,
+  History,
 } from "lucide-react";
 import { Card } from "../../components/ui/Card";
 import { PlanDisplay } from "../../components/plan/PlanDisplay";
@@ -43,61 +44,73 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-12 px-6">
+    <div className="min-h-screen pt-20 sm:pt-24 pb-12 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-1">Your Training Plan</h1>
-            <p className="text-[var(--color-muted)]">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-1">Your Training Plan</h1>
+            <p className="text-xs sm:text-sm text-[var(--color-muted)]">
               Version {plan.version} • Created {formatDate(plan.createdAt)}
             </p>
           </div>
 
-          <Button
-            variant="secondary"
-            className="gap-2"
-            onClick={async () => await generatePlan()}
-          >
-            <RefreshCcw className="w-4 h-4" />
-            Regenerate Plan
-          </Button>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <Button
+              variant="secondary"
+              size="sm"
+              className="gap-2 text-xs sm:text-sm flex-1 sm:flex-initial justify-center"
+              onClick={() => router.push("/history")}
+            >
+              <History className="w-4 h-4" />
+              History
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="gap-2 text-xs sm:text-sm flex-1 sm:flex-initial justify-center"
+              onClick={async () => await generatePlan()}
+            >
+              <RefreshCcw className="w-4 h-4" />
+              Regenerate
+            </Button>
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <Card variant="bordered" className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <Target className="w-5 h-5 text-[var(--color-accent)]" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-8">
+          <Card variant="bordered" className="flex items-center gap-2.5 sm:gap-3 p-3.5 sm:p-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+              <Target className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-accent)]" />
             </div>
-            <div>
-              <p className="text-xs text-[var(--color-muted)]">Goal</p>
-              <p className="font-medium text-sm">{plan.overview.goal}</p>
-            </div>
-          </Card>
-          <Card variant="bordered" className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-[var(--color-accent)]" />
-            </div>
-            <div>
-              <p className="text-xs text-[var(--color-muted)]">Frequency</p>
-              <p className="font-medium text-sm">{plan.overview.frequency}</p>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs text-[var(--color-muted)]">Goal</p>
+              <p className="font-medium text-xs sm:text-sm truncate">{plan.overview.goal}</p>
             </div>
           </Card>
-          <Card variant="bordered" className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <Dumbbell className="w-5 h-5 text-[var(--color-accent)]" />
+          <Card variant="bordered" className="flex items-center gap-2.5 sm:gap-3 p-3.5 sm:p-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-accent)]" />
             </div>
-            <div>
-              <p className="text-xs text-[var(--color-muted)]">Split</p>
-              <p className="font-medium text-sm">{plan.overview.split}</p>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs text-[var(--color-muted)]">Frequency</p>
+              <p className="font-medium text-xs sm:text-sm truncate">{plan.overview.frequency}</p>
             </div>
           </Card>
-          <Card variant="bordered" className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-[var(--color-accent)]" />
+          <Card variant="bordered" className="flex items-center gap-2.5 sm:gap-3 p-3.5 sm:p-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+              <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-accent)]" />
             </div>
-            <div>
-              <p className="text-xs text-[var(--color-muted)]">Version</p>
-              <p className="font-medium text-sm">{plan.version}</p>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs text-[var(--color-muted)]">Split</p>
+              <p className="font-medium text-xs sm:text-sm truncate">{plan.overview.split}</p>
+            </div>
+          </Card>
+          <Card variant="bordered" className="flex items-center gap-2.5 sm:gap-3 p-3.5 sm:p-4">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--color-accent)]" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-xs text-[var(--color-muted)]">Version</p>
+              <p className="font-medium text-xs sm:text-sm truncate">{plan.version}</p>
             </div>
           </Card>
         </div>

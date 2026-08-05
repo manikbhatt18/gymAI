@@ -11,20 +11,20 @@ export default function Navbar() {
   const { user } = useAuth(); // Replace with actual authentication logic
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-background)]/80 backdrop-blur-md">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <Link
           href="/"
           className="flex items-center gap-2 text-[var(--color-foreground)]"
         >
-          <Dumbbell className="w-6 h-6 text-[var(--color-accent)]" />
-          <span className="font-semibold text-lg">GymAI</span>
+          <Dumbbell className="w-5 h-5 sm:w-6 sm:h-6 text-[var(--color-accent)]" />
+          <span className="font-semibold text-base sm:text-lg">GymAI</span>
         </Link>
 
-        <nav>
+        <nav className="flex items-center gap-2 sm:gap-3">
           {user ? (
             <>
               <Link href="/profile">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="text-xs sm:text-sm px-2.5 sm:px-3">
                   My Plan
                 </Button>
               </Link>
@@ -33,12 +33,12 @@ export default function Navbar() {
           ) : (
             <>
               <Link href="/auth/sign-in">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="text-xs sm:text-sm px-2.5 sm:px-3">
                   Sign In
                 </Button>
               </Link>
               <Link href="/auth/sign-up">
-                <Button size="sm">Sign Up</Button>
+                <Button size="sm" className="text-xs sm:text-sm px-2.5 sm:px-3">Sign Up</Button>
               </Link>
             </>
           )}

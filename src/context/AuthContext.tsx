@@ -22,7 +22,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-    const [neonUser, setNeonUser] = useState<any>(null);
+    const [neonUser, setNeonUser] = useState<User | null>(null);
     const [plan, setPlan] = useState<TrainingPlan | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const isRefreshingRef = useRef(false);
@@ -32,11 +32,11 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const result = await authClient.getSession();
         if (result && result.data?.user) {
-          setNeonUser(result.data.user);
+          setNeonUser(result.data.user as User);
         } else {
           setNeonUser(null);
         }
-      } catch (err) {
+      } catch {
         setNeonUser(null);
       }
       finally {

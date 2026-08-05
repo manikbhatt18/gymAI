@@ -1,4 +1,5 @@
 import { Dumbbell, Info } from "lucide-react";
+import Link from "next/link";
 import type { DaySchedule, Exercise } from "../../types";
 import { Card } from "../ui/Card";
 
@@ -59,19 +60,26 @@ function ExerciseRow({
 
 function DayCard({ schedule }: { schedule: DaySchedule }) {
   return (
-    <Card variant="bordered" className="overflow-hidden">
-      <div className="flex items-center justify-between mb-4">
+    <Card variant="bordered" className="overflow-hidden p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="font-semibold text-lg">{schedule.day}</h3>
-          <p className="text-sm text-[var(--color-accent)]">{schedule.focus}</p>
+          <h3 className="font-semibold text-base sm:text-lg">{schedule.day}</h3>
+          <p className="text-xs sm:text-sm text-[var(--color-accent)]">{schedule.focus}</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
-          <Dumbbell className="w-4 h-4" />
-          <span>{schedule.exercises.length} exercises</span>
+        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 w-full sm:w-auto">
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm text-[var(--color-muted)]">
+            <Dumbbell className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>{schedule.exercises.length} exercises</span>
+          </div>
+          <Link href={`/workout/${schedule.day.toLowerCase()}`} className="w-auto">
+            <span className="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent)]/90 active:scale-95 transition-all cursor-pointer">
+              Log Workout
+            </span>
+          </Link>
         </div>
       </div>
 
-      <div className="overflow-x-auto -mx-6 px-6">
+      <div className="overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-[var(--color-muted)] text-xs uppercase tracking-wider">
