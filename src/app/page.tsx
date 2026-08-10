@@ -97,6 +97,31 @@ export default function Home() {
               </Button>
             </Link>
           </div>
+
+          {/* Demo Account Credentials Banner */}
+          <div className="mt-10 p-4 sm:p-5 bg-blue-500/10 border border-blue-500/20 rounded-2xl inline-block text-left shadow-lg backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xl">👋</span>
+              <p className="text-sm sm:text-base text-blue-400 font-semibold">Just looking around?</p>
+            </div>
+            <p className="text-sm text-zinc-300 mb-3">
+              Use our demo account to skip registration and explore the app:
+            </p>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-zinc-400 w-16">Email:</span>
+                <code className="text-sm text-white font-mono bg-zinc-900/80 px-2.5 py-1 rounded-md border border-zinc-700/50 select-all">
+                  demo@gymai.com
+                </code>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-zinc-400 w-16">Password:</span>
+                <code className="text-sm text-white font-mono bg-zinc-900/80 px-2.5 py-1 rounded-md border border-zinc-700/50 select-all">
+                  password123
+                </code>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
