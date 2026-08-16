@@ -33,6 +33,32 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         const result = await authClient.getSession();
         if (result && result.data?.user) {
           setNeonUser(result.data.user as User);
+          
+          // --- TEMPORARY TEST SCRIPT ---
+          try {
+            if ((result.data as any)?.session?.token) {
+              const jwt = (result.data as any).session.token;
+              console.log("=== RAW JWT ===", jwt);
+              // Decode base64 URL payload (the middle part of the JWT)
+              const base64Url = jwt.split('.')[1];
+              const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+              const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                  return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+              }).join(''));
+              const payload = JSON.parse(jsonPayload);
+              console.log("=== DECODED JWT PAYLOAD ===");
+              console.log("sub:", payload.sub);
+              console.log("iss:", payload.iss);
+              console.log("exp:", payload.exp, "->", new Date(payload.exp * 1000).toLocaleString());
+              console.log("Full Payload:", payload);
+            } else {
+              console.log("No token found in result.data.session:", result.data);
+            }
+          } catch (e) {
+            console.error("Token decode failed:", e);
+          }
+          // -----------------------------
+          
         } else {
           setNeonUser(null);
         }

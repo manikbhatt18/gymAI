@@ -1,29 +1,32 @@
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../lib/prisma";
-import type { CreateWorkoutInput, SetLogInput } from "../../types/index";
+import type { CreateWorkoutInput } from "../../types/index";
+import { requireAuth } from "../middleware/auth";
 
 export const workoutRouter = Router();
 
-workoutRouter.post("/log", async (req: Request, res: Response) => {
+workoutRouter.post("/log", requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId, planId, dayName, sets } = req.body as CreateWorkoutInput;
+    const { planId, dayName, sets } = req.body as CreateWorkoutInput;
+    const userId = req.user?.id;
 
     if (!userId || !planId || !dayName || !sets || !Array.isArray(sets)) {
-      return res.status(400).json({ error: "Missing required fields" });
+      res.status(400).json({ error: "Missing required fields or invalid sets" });
+      return;
     }
 
-    const createdLog = await prisma.workout_logs.create({
+    const workoutLog = await prisma.workout_logs.create({
       data: {
         user_id: userId,
         plan_id: planId,
         day_name: dayName,
         set_logs: {
-          create: sets.map((s: SetLogInput) => ({
-            exercise_name: s.exerciseName,
-            set_number: Number(s.setNumber),
-            weight: Number(s.weight),
-            reps: Number(s.reps),
-            rpe: s.rpe !== undefined && s.rpe !== null && s.rpe !== "" ? Number(s.rpe) : null,
+          create: sets.map((set) => ({
+            exercise_name: set.exerciseName,
+            set_number: Number(set.setNumber),
+            weight: Number(set.weight),
+            reps: Number(set.reps),
+            rpe: set.rpe ? Number(set.rpe) : null,
           })),
         },
       },
@@ -32,21 +35,19 @@ workoutRouter.post("/log", async (req: Request, res: Response) => {
       },
     });
 
-    const { set_logs, ...workoutLog } = createdLog;
-    const newLog = { workoutLog, setLogs: set_logs };
-
-    res.json({ success: true, log: newLog });
+    res.json({ success: true, workoutLog });
   } catch (error) {
     console.error("Error logging workout:", error);
     res.status(500).json({ error: "Failed to log workout" });
   }
 });
 
-workoutRouter.get("/history", async (req: Request, res: Response) => {
+workoutRouter.get("/history", requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.query.userId as string;
+    const userId = req.user?.id;
     if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
 
     const history = await prisma.workout_logs.findMany({
@@ -54,37 +55,47 @@ workoutRouter.get("/history", async (req: Request, res: Response) => {
       include: {
         set_logs: true,
       },
-      orderBy: { created_at: "desc" },
+      orderBy: {
+        created_at: "desc",
+      },
     });
 
     res.json(history);
   } catch (error) {
-    console.error("Error fetching history:", error);
+    console.error("Error fetching workout history:", error);
     res.status(500).json({ error: "Failed to fetch workout history" });
   }
 });
 
-workoutRouter.get("/previous", async (req: Request, res: Response) => {
+workoutRouter.get("/previous", requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.query.userId as string;
+    const userId = req.user?.id;
     const dayName = req.query.dayName as string;
-    
+
     if (!userId || !dayName) {
-      return res.status(400).json({ error: "User ID and dayName are required" });
+      res.status(400).json({ error: "Missing required query parameters" });
+      return;
     }
 
-    const previousLog = await prisma.workout_logs.findFirst({
-      where: { 
+    const previousWorkout = await prisma.workout_logs.findFirst({
+      where: {
         user_id: userId,
-        day_name: dayName 
+        day_name: dayName,
       },
       include: {
         set_logs: true,
       },
-      orderBy: { created_at: "desc" },
+      orderBy: {
+        created_at: "desc",
+      },
     });
 
-    res.json(previousLog || null);
+    if (!previousWorkout) {
+      res.json(null);
+      return;
+    }
+
+    res.json(previousWorkout);
   } catch (error) {
     console.error("Error fetching previous workout:", error);
     res.status(500).json({ error: "Failed to fetch previous workout" });

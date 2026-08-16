@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import OpenAI from "openai";
 import dotenv from "dotenv";
 import type { GeneratedPlanJson, ChatMessageInput, DaySchedule } from "../../types/index";
+import { requireAuth } from "../middleware/auth";
 
 dotenv.config();
 
@@ -17,9 +18,10 @@ const openai = new OpenAI({
   },
 });
 
-chatRouter.post("/", async (req: Request, res: Response) => {
+chatRouter.post("/", requireAuth, async (req: Request, res: Response) => {
   try {
-    const { messages, userId } = req.body as { messages?: ChatMessageInput[]; userId?: string };
+    const { messages } = req.body as { messages?: ChatMessageInput[] };
+    const userId = req.user?.id;
 
     if (!userId || !messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: "User ID and messages array are required" });

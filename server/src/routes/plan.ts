@@ -3,15 +3,17 @@ import { prisma } from "../lib/prisma";
 import { generateTrainingPlan } from "../lib/ai";
 import type { InputJsonValue } from "../generated/prisma/internal/prismaNamespace";
 import type { GeneratedPlanJson } from "../../types/index";
+import { requireAuth } from "../middleware/auth";
 
 export const planRouter = Router();
 
-planRouter.post("/generate", async (req: Request, res: Response) => {
+planRouter.post("/generate", requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId } = req.body as { userId?: string };
+    const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
 
     const profile = await prisma.user_profiles.findUnique({
@@ -19,9 +21,10 @@ planRouter.post("/generate", async (req: Request, res: Response) => {
     });
 
     if (!profile) {
-      return res
+      res
         .status(400)
         .json({ error: "User profile not found. Complete onboarding first." });
+      return;
     }
 
     // Retrieve the latest plan to compute next version
@@ -41,10 +44,11 @@ planRouter.post("/generate", async (req: Request, res: Response) => {
       planJson = await generateTrainingPlan(profile);
     } catch (error) {
       console.error("AI generation failed:", error);
-      return res.status(500).json({
+      res.status(500).json({
         error: "Failed to generate training plan. Please try again.",
         details: error instanceof Error ? error.message : "Unknown error",
       });
+      return;
     }
 
     const planText = JSON.stringify(planJson, null, 2);
@@ -69,11 +73,12 @@ planRouter.post("/generate", async (req: Request, res: Response) => {
   }
 });
 
-planRouter.get("/current", async (req: Request, res: Response) => {
+planRouter.get("/current", requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const userId = req.query.userId as string;
+    const userId = req.user?.id;
     if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
 
     const plan = await prisma.training_plans.findFirst({
@@ -85,7 +90,8 @@ planRouter.get("/current", async (req: Request, res: Response) => {
     });
 
     if (!plan) {
-      return res.status(404).json({ error: "No plan found" });
+      res.status(404).json({ error: "No plan found" });
+      return;
     }
 
     res.json({

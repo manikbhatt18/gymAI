@@ -1,15 +1,18 @@
 import { Router, type Request, type Response } from "express";
 import { prisma } from "../lib/prisma";
 import type { UserProfileInput } from "../../types/index";
+import { requireAuth } from "../middleware/auth";
 
 export const profileRouter = Router();
 
-profileRouter.post("/", async (req: Request, res: Response) => {
+profileRouter.post("/", requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { userId, ...profileData } = req.body as UserProfileInput & { userId?: string };
+    const { ...profileData } = req.body as UserProfileInput;
+    const userId = (req as any).user?.id;
 
     if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
+      res.status(401).json({ error: "Unauthorized" });
+      return;
     }
 
     const goal = profileData.goal;
@@ -28,7 +31,8 @@ profileRouter.post("/", async (req: Request, res: Response) => {
       !equipment ||
       !preferredSplit
     ) {
-      return res.status(400).json({ error: "Missing required fields" });
+      res.status(400).json({ error: "Missing required fields" });
+      return;
     }
 
     await prisma.user_profiles.upsert({

@@ -7,12 +7,37 @@ import type {
   TrainingPlan,
 } from "../types";
 
+import { authClient } from "./auth";
+
 const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/+$/, "");
 
+async function getAuthHeaders() {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  try {
+    // We use authClient.token() to explicitly get a fresh JWT, not a cached session
+    const result = await (authClient as any).token();
+    console.log("[DEBUG API] authClient.token() result:", result);
+    
+    // Fallback to multiple possible token paths just in case
+    const token = result?.data?.session?.token || result?.data?.token;
+    console.log("[DEBUG API] Extracted Token:", token ? token.substring(0, 15) + "..." : "undefined");
+    
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    } else {
+      console.warn("[DEBUG API] No token found to send in headers!");
+    }
+  } catch (e) {
+    console.error("Failed to fetch fresh token:", e);
+  }
+  return headers;
+}
+
 async function post<T = unknown>(path: string, body: unknown): Promise<T> {
+  const headers = await getAuthHeaders();
   const res = await fetch(`${BASE_URL}/api${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(body),
   });
 
@@ -25,7 +50,9 @@ async function post<T = unknown>(path: string, body: unknown): Promise<T> {
 }
 
 async function get<T = unknown>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}/api${path}`);
+  const headers = await getAuthHeaders();
+  // For GET requests, we only need the Authorization header, but Content-Type is fine too
+  const res = await fetch(`${BASE_URL}/api${path}`, { headers });
   if (!res.ok) {
     const errorData = (await res.json().catch(() => ({}))) as { error?: string };
     throw new Error(errorData.error || "Request failed");

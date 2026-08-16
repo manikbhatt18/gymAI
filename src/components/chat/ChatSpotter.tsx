@@ -35,9 +35,19 @@ export function ChatSpotter() {
 
     try {
       const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001").replace(/\/+$/, "");
+      
+      const { authClient } = await import("../../lib/auth");
+      const sessionResult = await (authClient as any).token();
+      const token = sessionResult?.data?.session?.token;
+      
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${BASE_URL}/api/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           userId: user.id,
           messages: currentMessages.map((m) => ({ role: m.role, content: m.content })),
